@@ -3,7 +3,12 @@
 namespace newengine {
 	namespace graphics {
 		
-		void windowResize(GLFWwindow* window, int width, int height);
+		bool Window::keys[GLFW_KEY_LAST];
+		bool Window::buttons[GLFW_MOUSE_BUTTON_LAST];
+		double Window::mouseX;
+		double Window::mouseY;
+
+		void window_resize(GLFWwindow* window, int width, int height);
 	
 		Window::Window(const char* title, int width, int height) {
 			this->title = title;
@@ -12,6 +17,14 @@ namespace newengine {
 
 			if (!init())
 				glfwTerminate();
+
+			for(int i = 0; i < GLFW_KEY_LAST; i++) {
+				keys[i] = false;
+			}
+			
+			for(int i = 0; i < GLFW_MOUSE_BUTTON_LAST; i++) {
+				buttons[i] = false;
+			}
 		}
 
 		Window::~Window() {
@@ -31,7 +44,33 @@ namespace newengine {
 				return false;
 			}
 			glfwMakeContextCurrent(window);
-			glfwSetWindowSizeCallback(window, windowResize);
+			glfwSetWindowUserPointer(window, this);
+			glfwSetWindowSizeCallback(window, window_resize);
+			glfwSetKeyCallback(window, [](GLFWwindow* win,
+				int key,
+				int scanCode,
+				int action,
+				int mods) {
+					Window* frame = (Window*)glfwGetWindowUserPointer(win);
+					frame->keys[key] = action != GLFW_RELEASE;
+				});
+
+			glfwSetMouseButtonCallback(window, [](GLFWwindow* win, 
+				int button, 
+				int action, 
+				int mods){
+					Window* frame = (Window*)glfwGetWindowUserPointer(win);
+					frame->buttons[button] = action != GLFW_RELEASE;
+				});
+
+			glfwSetCursorPosCallback(window, [](GLFWwindow* win, 
+				double xpos, 
+				double ypos)
+				{
+					Window* frame = (Window*)glfwGetWindowUserPointer(win);
+					frame->mouseX = xpos;
+					frame->mouseY = ypos;
+				});
 
 			std::cout << "OpenGL: " << glGetString(GL_VERSION) << std::endl;
 
@@ -42,6 +81,23 @@ namespace newengine {
 
 			return true;
 
+		}
+
+		bool Window::isKeyPresssed(unsigned int keycode) const{
+			if (keycode >= GLFW_KEY_LAST)
+				return false;
+			return keys[keycode];
+		}
+
+		bool Window::isMouseButtonPresssed(unsigned int buttoncode) const{
+			if (buttoncode >= GLFW_MOUSE_BUTTON_LAST)
+				return false;
+			return buttons[buttoncode];
+		}
+
+		void Window::getMousePosition(double& x, double& y) const {
+			x = mouseX;
+			y = mouseY;
 		}
 
 		void Window::clear() const {
@@ -57,9 +113,8 @@ namespace newengine {
 			return glfwWindowShouldClose(window);
 		}
 
-		void windowResize(GLFWwindow* window, int width, int height) {
+		void window_resize(GLFWwindow* window, int width, int height) {
 			glViewport(0, 0, width, height);
 		}
-	
 	}
 }

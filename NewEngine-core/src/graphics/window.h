@@ -14,6 +14,10 @@ namespace newengine {
 			GLFWwindow* window;
 			bool isClosed;
 
+			static bool keys[GLFW_KEY_LAST];
+			static bool buttons[GLFW_MOUSE_BUTTON_LAST];
+			static double mouseX, mouseY;
+
 		public:
 			Window(const char* name, int width, int height);
 			~Window();
@@ -23,6 +27,10 @@ namespace newengine {
 
 			inline int getWidth() const { return width; }
 			inline int getHeight() const { return height; }
+
+			bool isKeyPresssed(unsigned int keycode) const;
+			bool isMouseButtonPresssed(unsigned int buttoncode) const;
+			void getMousePosition(double& x, double& y) const;
 
 		private:
 			bool init();
