@@ -20,10 +20,16 @@ int main() {
 
 	Vector2 c = a + b;
 
+	Matrix4 position = Matrix4::translation(Vector3(2, 3, 4));
+
+	Vector4 column2 = position.columns[2];
+
+	std::cout << &position.elements[4] << std::endl;
+
+	std::cout << &position.columns[1].x << std::endl;
+
 	while (!window.closed()) {
 		window.clear();
-		
-		std::cout << b << std::endl;
 
 		glBegin(GL_QUADS);
 		glVertex2f(-0.5f, -0.5f);
